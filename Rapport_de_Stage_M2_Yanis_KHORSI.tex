@@ -1,0 +1,49 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[francais, english]{babel}
+\usepackage{lmodern}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xpatch}
+\usepackage{eurosym}
+
+\title{OpenCL LLVM Backend Prototyping}
+\author{Yanis \bsc{KHORSI}}
+\date{Stage de Master 2}
+
+\begin{document}
+\maketitle
+\newpage
+%\null
+%\newpage
+
+\let\englishtableofcontents\tableofcontents
+\patchcmd\englishtableofcontents{{toc}}{{tec}}{}{}
+\preto\englishtableofcontents{\begin{otherlanguage}{english}}
+\appto\englishtableofcontents{\end{otherlanguage}}
+\newcommand{\addetoc}[2]{\addcontentsline{tec}{#1}{\protect\numberline{\csname
+the#1\endcsname}#2}}
+\renewcommand{\contentsname}{Sommaire}
+\tableofcontents{}
+\newpage
+\englishtableofcontents{}
+
+\newpage
+\input{abstract.tex}
+
+%\newpage
+\input{introduction.tex}
+%\newpage
+\input{entreprise_et_service.tex}
+\input{sujet_de_stage.tex}
+\input{travaux_realises.tex}
+%\newpage
+\input{conclusion.tex}
+
+%\newpage
+%\bibliographystyle{plain}
+%\bibliography{bibliography}
+
+\end{document}

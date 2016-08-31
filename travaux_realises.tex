@@ -1,0 +1,114 @@
+\section{Travaux réalisés}
+\addetoc{section}{Completed works}
+\paragraph{}
+Mon stage consiste à mettre en \oe{}vre un prototype du module de spécialisation
+de code LLVM pour backend OpenCL de la chaîne de compilation présentée plus
+haut, autrement dit la pass LLVM qui se charge de transformer le code en LLVM IR
+étendue de notre frontend vers un code IR pur pour tout périphérique supportant
+l'OpenCL. Il me faut donc commencer par apprendre le modèle de programmation
+OpenCL.
+
+\subsection{OpenCL}
+\addetoc{subsection}{OpenCL}
+\subsubsection{Modéle de programmation OpenCL}
+\addetoc{subsubsection}{OpenCL programming model}
+\paragraph{}
+OpenCL (Open Computing Language) est un standard de programmation proposé par le
+\emph{Khronos group} qui offre au développeur un moyen de programmation
+parallèle hétérogène permettant de cibler les différentes architectures de la
+machine, un code OpenCL peut donc tout aussi bien être exécuter sur un CPU
+multi-c\oe{}urs que sur un accélérateur massivement parallèle tels que les GPUs
+et le Xeon Phi.
+
+Il offre donc une autre manière de programmer en faisant une distinction entre
+le code hôte qui sera exécuté par le CPU et qui fera appel au noyau de calcul
+(\emph{kernel} en anglais) qui sera compilé et adapté pour le périphérique de
+calcul choisie. Le kernel est écrit en OpenCL C, une combinaison d'une API et du
+langage C. Le kernel est exécuté par chaque \emph{thread} OpenCL ou
+\emph{work-item} qui sont organisés en blocs \emph{work-group} qui sont
+eux-mêmes regroupés dans une grille \emph{NDRange}.\\
+La grille et les blocs peuvent être découpés en plusieurs dimension, allant de 1
+à \og{} CL\_DEVICE\_MAX\_WORK\_ITEM\_DIMENSIONS \fg{} qui dépend du périphérique
+de calcul choisi, la dimension est donnée lors du lancement du kernel au même
+moment que les tailles de ces derniers. On pourra par la suite dans le kernel
+récupérer ces informations ainsi que l'ID local au sein d'un work-group ou
+global dans la NDRange du thread en cours d'exécution afin de potentiellement
+définir une instruction spécifique qu'à une certaines parties des threads.
+Néanmoins, les threads sont exécuté par paquet, selon la taille de l'unité
+vectoriel du périphérique, un paquet de work-item est exécuter en parallèle, il
+est donc préférable d'y tenir compte lors de la définition des tailles de bloc
+et de l'écriture du kernel. Il faut aussi faire attention à ne pas dépasser la
+taille maximale d'un bloc ou de la grille pour chaque dimension, elle dépend du
+périphérique utilisé et peut être récupérée grâce à des fonction OpenCL dans le
+code hôte.
+
+Il existe plusieurs type de mémoires en OpenCL selon le niveau dans la
+hiérarchie, chaque work-item possède une mémoire privée, les work-items d'un
+même work-group se partagent une mémoire locale, et puis tous les work-items de
+tous les work-groups ont accès à une mémoire globale et une mémoire constante.
+Chacune de ces mémoire a une vitesse d'accès dépendant de leur localité par
+exemple les threads d'un même bloc accéderont plus rapidement à la mémoire
+locale qu'à la mémoire globale.
+
+Un périphérique OpenCL peut contenir une ou plusieurs unités de calcul (compute
+units), un work-group est exécuter sur un seul compute unit, ce dernier a une
+mémoire locale.\\
+La figure {\Huge\textbf{toto}} schématise ce qui a été dit.
+
+\subsubsection{SPIR}
+\addetoc{subsubsection}{SPIR}
+\paragraph{}
+Le kernel est généré après une passe de spécialisation OpenCL de LLVM, il est
+écrit en \emph{SPIR}, c'est un langage bas niveau, c'est la correspondance de
+OpenCL en langage LLVM, les versions 1.2 et 2.0 sont d'ailleurs basées sur ce
+dernier, il adopte deux des trois formats de représentation de LLVM : le bitcode
+et l'assembleur. Il est supporté par tout les périphérique utilisant OpenCL et
+chargeant l'extension \og{} khr\_spir \fg{}.
+
+Le mangling (création de symbole) des fonctions se base sur le type des
+arguments de cette fonction, il adopte les concept de l'ABI Itanium C++.
+
+\subsection{Adaptation du runtime}
+\addetoc{subsection}{Runtime adaptation}
+\paragraph{}
+
+\subsection{Spécialisateur}
+\addetoc{subsection}{Specializer}
+\paragraph{}
+
+\subsubsection{Code hôte}
+\addetoc{subsubsection}{Host code}
+\paragraph{}
+
+\subsubsection{Ufunc}
+\addetoc{subsubsection}{Ufunc}
+\paragraph{}
+
+\subsubsection{Rfunc}
+\addetoc{subsubsection}{Rfunc}
+\paragraph{}
+
+\subsubsection{Sfunc}
+\addetoc{subsubsection}{Sfunc}
+\paragraph{}
+
+\subsection{Optimisation de compilation}
+\addetoc{subsection}{Compilation optimization}
+\paragraph{}
+
+\subsection{Tests expérimentaux}
+\addetoc{subsection}{Experimental tests}
+\paragraph{}
+
+\subsubsection{Description de la machine}
+\addetoc{subsubsection}{Machine description}
+\paragraph{}
+
+\subsubsection{Jacobi}
+\addetoc{subsubsection}{Jacobi}
+\paragraph{}
+
+\subsubsection{Test de toute la chaine de compilation}
+\addetoc{subsubsection}{Test entire toolchain}
+\paragraph{}
+
