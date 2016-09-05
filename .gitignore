@@ -1,9 +1,11 @@
-*.swp
 *.aux
+*.bbl
+*.blg
+*.lof
 *.log
+*.lot
 *.out
 *.pdf
 *.toc
 *.tec
-*.bbl
-*.blg
+*.swp

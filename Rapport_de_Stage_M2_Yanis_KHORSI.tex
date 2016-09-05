@@ -1,49 +1,64 @@
 \documentclass[12pt,a4paper]{article}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage[francais, english]{babel}
-\usepackage{lmodern}
-\usepackage{url}
-\usepackage{hyperref}
-\usepackage{xpatch}
+\usepackage{color}
 \usepackage{eurosym}
-
-\title{OpenCL LLVM Backend Prototyping}
-\author{Yanis \bsc{KHORSI}}
-\date{Stage de Master 2}
+\usepackage{fancyhdr}
+\usepackage[T1]{fontenc}
+\usepackage[bottom=40mm]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{libertine}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{url}
+\usepackage{xpatch}
 
 \begin{document}
-\maketitle
+\input{page_de_garde.tex}
+
 \newpage
-%\null
-%\newpage
+\pagestyle{empty}
+\null
+\newpage
+
+\pagestyle{fancy}
+\lhead{\rightmark}
+\rhead{Yanis \bsc{KHORSI}}
+\cfoot{\thepage}
+
+\input{remerciements.tex}
+\newpage
+\input{abstract.tex}
 
 \let\englishtableofcontents\tableofcontents
 \patchcmd\englishtableofcontents{{toc}}{{tec}}{}{}
 \preto\englishtableofcontents{\begin{otherlanguage}{english}}
 \appto\englishtableofcontents{\end{otherlanguage}}
-\newcommand{\addetoc}[2]{\addcontentsline{tec}{#1}{\protect\numberline{\csname
-the#1\endcsname}#2}}
+\newcommand{\addetoc}[2]{
+   \addcontentsline{tec}{#1}{\protect\numberline{\csname the#1\endcsname}#2}}
+
 \renewcommand{\contentsname}{Sommaire}
+\newpage
 \tableofcontents{}
 \newpage
 \englishtableofcontents{}
+\newpage
+\listoffigures
 
 \newpage
-\input{abstract.tex}
-
-%\newpage
 \input{introduction.tex}
-%\newpage
 \input{entreprise_et_service.tex}
 \input{sujet_de_stage.tex}
 \input{travaux_realises.tex}
-%\newpage
+\newpage
 \input{conclusion.tex}
 
-%\newpage
-%\bibliographystyle{plain}
-%\bibliography{bibliography}
+\newpage
+\bibliographystyle{plain}
+\bibliography{bibliography}
 
 \end{document}

@@ -1,7 +1,43 @@
 \renewcommand{\abstractname}{Résumé}
 \begin{abstract}
 \end{abstract}
+Dans le cadre du calcul Haute Performance (HPC), l'utilisation des accélérateurs
+(GPUs ou Xeon Phi) à tendance à augmenter. Malheureusement, très peu de codes
+de calcul sont capables d'exploiter toutes les performances de ces matériels.
+Les coûts de translation et optimisations appropriées deviennent plus gros, et
+les modèles de programmations ne sont pas unifiés, à part quelques initiatives
+comme OpenCL. Les technologies actuelles nécessitent généralement un compromis
+entre la généricité et la performance. Pourtant, il est clair que les structures
+algorithmiques nécessaires pour la plupart des accélérateurs sont similaires et
+que cette abstraction suffisante pourrait adresser les différentes
+architectures. AS+ en partenariat avec le CEA et l'INRA ont développé dans le
+cadre du projet ITEA Mach une chaîne de compilation basée sur le langage R pour
+des machines hétérogènes mixant CPUs, GPUs et Xoen Phi. Le backend de cette
+chaîne développé par AS+, repose sur une couche d'abstraction, et de modules de
+spécialisations pour différentes cibles. Le code optimisé exprimé avec cette
+couche d'abstraction ne nécessite pas de réécriture de code, le module de
+spécialisation génère automatiquement un code performant pour le matériel ciblé.
+Le code exécuté est vue comme un ensemble de tâches avec des dépendances de
+données implicites. Le but de mon stage est de mettre en \oe{}uvre l'un des
+modules de spécialisation, qui permet de généré du code optimisé en OpenCL.
 
 \renewcommand{\abstractname}{Abstract}
 \begin{abstract}
 \end{abstract}
+In the field of high performance computing (HPC), the use of accelerators (GPUs
+or Xeon Phi) is now a strong growth trend. Unfortunately few codes are able to
+fully exploit the power of these. The costs of translation and related
+optimizations are becoming higher and programming models are not unified,
+despite some initiatives like OpenCL. Current technologies typically require a
+trade-off betweem genericity and performance. Yet it is clear that algorithmic
+structures required for most accelerators are similar and that sufficient
+abstraction would address the different architectures. Whitin ITEA MACH project
+AS+ teams have jointly developed with CEA and INRA a toolchain for compiling R
+language to heterogeneous platforms mixing CPUs, GPUs and Xeon Phi. The backend
+of this toolchain, developpend by AS+, relies on an abstraction layer, and
+specialization modules for different targets. Optimized code expressed with this
+abstraction layer no longer require rewriting and specialization module
+automatically generates an efficient code for the target architecture. The code
+to be executed can be seen as a set of smaller tasks with implicit data
+dependencies. The purpose of my internship is to implement one of the
+specialization modules, allowing generated optimized code with OpenCL.
