@@ -5,7 +5,7 @@ Mon stage consiste à mettre en \oe{}uvre un prototype de module de
 spécialisation de code LLVM pour backend OpenCL de la chaîne de compilation
 présentée plus haut. Autrement dit la passe LLVM qui se charge de transformer le
 code en LLVM IR étendue du frontend R vers un code IR pur pour tout périphérique
-supportant l'OpenCL. Il me faut donc commencer par connaître le modèle de
+supportant l'OpenCL. Il m'a donc fallu commencer par connaître le modèle de
 programmation OpenCL.
 
 \subsection{OpenCL}
@@ -20,6 +20,7 @@ architectures de la machine, un code OpenCL peut donc tout aussi bien être
 exécuté sur un CPU multi-c\oe{}urs que sur un accélérateur massivement parallèle
 tels que les GPUs et le Xeon Phi.
 
+\paragraph{}
 Il offre donc une autre manière de programmer en faisant une distinction entre
 le code hôte qui est exécuté par le CPU et qui fait appel au noyau de calcul
 (\emph{kernel} en anglais) qui est compilé et adapté pour le périphérique de
@@ -44,16 +45,18 @@ maximale d'un bloc ou de la grille pour chaque dimension : elle dépend du
 périphérique utilisé et peut être récupérée grâce à des fonctions OpenCL dans le
 code hôte.
 
+\paragraph{}
 Il existe plusieurs types de mémoires en OpenCL selon le niveau dans la
 hiérarchie, chaque work-item possède une mémoire privée. Les work-items d'un
 même work-group se partagent une mémoire locale, et puis tous les work-items de
 tous les work-groups ont accès à une mémoire globale et une mémoire constante.
-Chacune de ces mémoires a une vitesse d'accès dépendant de leur localité par
+Chacune de ces mémoires a une vitesse d'accès dépendant de leur localité : par
 exemple les \emph{threads} d'un même bloc accéderont plus rapidement à la
 mémoire locale qu'à la mémoire globale.
 
+\paragraph{}
 Un périphérique OpenCL peut contenir une ou plusieurs unités de calcul (compute
-units), un work-group est exécuté sur une seule unité de clacul qui contient une
+units). Un work-group est exécuté sur une seule unité de clacul qui contient une
 mémoire locale.\\
 La figure~\ref{opencl_memory_model} schématise ce qui a été dit.
 
@@ -84,26 +87,30 @@ est $\_Z3sinf$.
 \subsection{Adaptation du runtime}
 \addetoc{subsection}{Runtime adaptation}
 \paragraph{}
-Une fois la prise en main du modèle de programmation OpenCL, il me fallait
+Une fois la prise en main du modèle de programmation OpenCL faite, il me fallait
 intégrer les fonctions de chargement de plateforme et de périphérique de calcul
-et les appels de lancement de \emph{kernel} au runtime de \emph{Mach}. La
-première partie est gérée par StarPU à l'initialisation du programme tout comme
-la gestion de mémoire. Des fonctions permettent par la suite de récupérer leurs
-identifiants qui sont stockés dans des structures spécifiques. Il fournit aussi
-des fonctions de chargement et compilation de programme à partir de fichier
-écrit en OpenCL C, ou d'un binaire déjà compilé par lui-même placé dans un
-dossier temporaire qu'il aura créé durant l'exécution, dépendant du périphérique
-utilisé et d'autres informations, ainsi qu'une fonction de chargement des
-\emph{kernels} qu'il contient.\\
+et les appels de lancement de \emph{kernel} au runtime de \emph{Mach}.
+
+La première partie est gérée par StarPU à l'initialisation du programme tout
+comme la gestion de mémoire. Des fonctions permettent par la suite de récupérer
+leurs identifiants qui sont stockés dans des structures spécifiques.
+
+Il fournit aussi des fonctions de chargement et compilation de programme à
+partir de fichier écrit en OpenCL C, ou d'un binaire déjà compilé par lui-même
+placé dans un dossier temporaire qu'il aura créé durant l'exécution, dépendant
+du périphérique utilisé et d'autres informations, ainsi qu'une fonction de
+chargement des \emph{kernels} qu'il contient.
+
 Néanmoins, nous voulons charger un binaire qui n'a pas déjà été compilé par
 StarPU, et par conséquent dont il n'a pas défini l'emplacement ; ainsi pour
-éviter de modifier le code source de cette dernière, je dois réimplémenter cette
-fonction dans notre runtime, en gardant les même structures de stockage pour le
-programme et les \emph{kernels}, de plus un oubli de libération de fichier s'est
-glissé dans le code de cette fonction, ce qui cause une surcharge des registres
-au bout d'un certain nombre de fichiers ouverts, ça me permet en même temps de
-remédier à cette erreur.
+éviter de modifier le code source de cette dernière, j'ai du réimplémenter cette
+fonction dans notre runtime, en gardant les mêmes structures de stockage pour le
+programme et les \emph{kernels}. Par ailleurs un oubli de libération de fichier
+s'était glissé dans le code de cette fonction, ce qui causait une surcharge des
+registres au bout d'un certain nombre de fichiers ouverts, ce qui m'a permis en
+même temps de remédier à cette erreur.
 
+\paragraph{}
 À l'initialisation, StarPU scanne la machine afin de détecter les plateformes
 et périphériques supportant OpenCL. Par défaut il ne recherche que les GPUs et
 accélérateurs type Xeon Phi, et privilégie les GPUs. Étant donné que certains
@@ -111,14 +118,15 @@ GPU Nvidia ne supportent pas le SPIR, le programme plantera à l'exécution, j'a
 donc ajouté une variable d'environnement qui permet de désactiver la recherche
 de GPU.
 
+\paragraph{}
 Les tableaux passés en arguments au \emph{kernel} OpenCL, doivent être des
-handles sur ces dernier, c'est-à-dire, qu'on doit passer un pointeur sur la
-première case. Les ND array sont généralement des vues, le premier élément ne se
-trouve donc peut-être pas à la première case du tableau. Contrairement à la
+\emph{handles} sur ces derniers, c'est-à-dire qu'on doit passer un pointeur sur
+la première case. Les ND array sont généralement des vues, le premier élément ne
+se trouve donc peut-être pas à la première case du tableau. Contrairement à la
 passe de spécialisation Cuda le décalage doit être effectué dans le
 \emph{kernel}. J'ai modifier le \emph{scratchpad} pour enregistrer l'indice du
 premier élément de chaque ND array, que je récupère ensuite à l'aide d'une
-fonction que j'ai implémenté dans le \emph{kernel} et je place le pointeur au
+fonction que j'ai implémentée dans le \emph{kernel} et je place le pointeur au
 bon endroit.
 
 \subsection{SPIR-Tools}
@@ -126,13 +134,14 @@ bon endroit.
 \paragraph{}
 Avant de commencer la spécialisation de code par passe LLVM, j'ai dû d'abord
 prendre en main le langage SPIR et vérifier que le runtime StarPU gère bien ce
-dernier, j'ai utilisé pour cela un outil fourni par le Khronos
-group~\cite{spir_clang} qui s'intègre au compilateur clang permettant la
-génération du binaire en SPIR à partir d'un \emph{kernel} écrit en OpenCL C.
-J'ai donc écrit la version OpenCL du calcul de \emph{jacobi}, l'un des cas
-utilisateur implémenté pour nos tests, qui fait la somme de chaque élément $(i,
-j)$ avec ses voisins $(i+1, j)$, $(i-1, j)$, $(i, j+1)$, $(i, j-1)$, ces deux
-derniers sont pondérés par un coefficient K, le tout multiplié par un réel R.
+dernier. J'ai utilisé pour cela le \emph{SPIR generator} dévelopé par le
+\emph{Khronos group}~\cite{spir_clang} qui s'intègre au compilateur clang
+permettant la génération du binaire en SPIR à partir d'un \emph{kernel} écrit en
+OpenCL C. J'ai donc écrit la version OpenCL du calcul de \emph{jacobi}, l'un des
+cas utilisateur implémenté pour nos tests, qui fait la somme de chaque élément
+$(i, j)$ avec ses voisins $(i+1, j)$, $(i-1, j)$, $(i, j+1)$, $(i, j-1)$, ces
+deux derniers sont pondérés par un coefficient K, le tout multiplié par un réel
+R.
 \[ B(i, j) = R * ( k*k * A(i, j-1) + k*k * A(i, j+1) + A(i-1, j) + A(i+1, j)) \]
 Le calcul est suivi d'une opération de réduction pour le comparer au seuil de
 convergence.
@@ -236,7 +245,7 @@ La spécialisation de code est une opération de transformation du code LLVM IR,
 ce qui revient donc à effectuer une passe dans LLVM~\cite{llvm_pass}.
 
 L'exécution d'un programme OpenCL se fait par l'appel du CPU au \emph{kernel},
-le spécialisateur prend donc en entrée un module et en fournie deux : un pour
+le spécialisateur prend donc en entrée un module et en fourni deux : un pour
 le code SPIR et un pour le code hôte qui fera appel aux \emph{kernels} du
 premier module.
 
@@ -244,13 +253,14 @@ premier module.
 \addetoc{subsubsection}{Host code}
 \paragraph{}
 J'ai maintenant compris comment créer un module LLVM et faire appel à des
-fonctions, ajout de variable globale, etc.\\
-J'ai aussi pris en main le modèle des passes déjà existante, sur lesquelles je
-base mon travail pour garder une uniformité dans l'architecture logicielle.
+fonctions, ajout de variable globale, etc. J'ai aussi pris en main le modèle des
+passes déjà existante, sur lesquelles je base mon travail pour garder une
+uniformité dans l'architecture logicielle.
 
+\paragraph{}
 Je commence par générer la partie hôte du code. Je suppose que le code
 \emph{kernel} existe déjà, j'utilise le fichier SPIR créé précédemment, et je
-fait les appels de fonction nécessaires au chargement et à la compilation du
+fais les appels de fonctions nécessaires au chargement et à la compilation du
 programme, puis à la fonction de chargement du \emph{kernel} à partir de ce
 programme, et je l'exécute grâce aux fonctions implémentées dans notre runtime.
 
@@ -259,6 +269,7 @@ d'étranglement qui ralentit énormément le programme et empêche le scheduler 
 tirer profit au maximum des performances du matériel utilisé. Nous verrons par
 la suite la solution employée pour contourner ce problème.
 
+\paragraph{}
 La première étape est de donner les paramètres de notre kernel à OpenCL, nous
 devons lui passer les pointeurs vers ceux-ci sous la forme d’un tableau, on
 l'appellera opération de packing d’argument. Ensuite la fonction
@@ -270,10 +281,11 @@ programme et d'une chaîne de caractères pour le nom du kernel. Pour connaitre 
 nombre de blocs à utiliser, la taille de l’un des ND arrays est récupérée (on
 suppose qu’ils sont de même taille) et divisée par le nombre de \emph{threads},
 puis on boucle sur le nombre de dimension $-1$ que l'on choisi pour diviser les
-blocs et la grille, et on calcul la racine carrée du nombre de blocs et de
+blocs et la grille, et on calcule la racine carrée du nombre de blocs et de
 \emph{threads}, qui représentent les nouvelles tailles de chaque dimension, pour
 les passer en arguments de la fonction de lancement du \emph{kernel}.
 
+\paragraph{}
 Je passe maintenant à la génération du module \emph{kernel} sous les trois types
 de tâches possibles.  Cette information est contenue dans une métadonnée qui est
 lue par le code hôte et résidant uniquement en mémoire CPU.
@@ -332,14 +344,13 @@ dans le \emph{scratchpad} (notre vecteur particulier initialisé avant le
 \end{figure}
 
 Une fois la réduction terminée par tous les blocs on retrouve nos résultats de
-réduction partielle en mémoire globale ; on relance alors le \emph{kernel} avec un
-nombre de \emph{threads} égal au nombre de blocs du \emph{kernel} précédent, afin de
-faire la dernière réduction sur un bloc.\\
-Néanmoins le nombre de \emph{threads} par bloc étant limité, dans le cas d'un
-très grand vecteur d'entrée, le nombre de résultats partiels au premier
-lancement de \emph{kernel} pourrait dépasser cette limite, il faudrait alors
-exécuter le \emph{kernel} autant de fois que nécessaire pour terminer la
-réduction en un bloc.
+réduction partielle en mémoire globale ; on relance alors le \emph{kernel} avec
+un nombre de \emph{threads} égal au nombre de blocs du \emph{kernel} précédent,
+afin de faire la dernière réduction sur un bloc. Néanmoins le nombre de
+\emph{threads} par bloc étant limité, dans le cas d'un très grand vecteur
+d'entrée, le nombre de résultats partiels au premier lancement de \emph{kernel}
+pourrait dépasser cette limite, il faudrait alors exécuter le \emph{kernel}
+autant de fois que nécessaire pour terminer la réduction en un bloc.
 
 Une autre solution plus performante inspirée de la passe Cuda est de modifier la
 boucle de chargement des données en mémoire locale pour qu'elle fasse un nombre
@@ -379,13 +390,14 @@ ligne sur le sujet. Les étapes de la réduction parallèle se résume ainsi :
 \subsubsection{Création de symbole SPIR OpenCL}
 \addetoc{subsubsection}{Mangling fuction}
 \paragraph{}
-Les fonctions mathématiques usuelles telles que $\cos$ et $\sin$ sont nécessaires
-au calcul scientifique. Mais ces fonctions ne correspondent pas à des
-instructions disponibles sur le matériel, il est donc nécessaire de créer leur
-symbole SPIR dans le \emph{kernel}. J'ai utilisé pour cela un outil fourni avec
-le générateur de code SPIR du \emph{KHRONOS group}, que j'ai intégré au
-spécialisateur OpenCL. Il suffit alors de remplacer les appels de fonctions
-mathématiques par des appels aux fonctions avec le symbole correspondant.
+Les fonctions mathématiques usuelles telles que $\cos$ et $\sin$ sont
+nécessaires au calcul scientifique. Mais ces fonctions ne correspondent pas à
+des instructions disponibles sur le matériel, il est donc nécessaire de créer
+leur symbole SPIR dans le \emph{kernel}. J'ai utilisé pour cela le
+\emph{spir\_name\_mangler} fourni dans les \emph{SPIR-Tools} par le
+\emph{KHRONOS group}, que j'ai intégré au spécialisateur OpenCL. Il suffit alors
+de remplacer les appels de fonctions mathématiques par des appels aux fonctions
+avec le symbole correspondant.
 
 \lstset{
    frame=L,
@@ -423,10 +435,12 @@ remplacée par la constante correspondante ce qui permet au compilateur
 d'effectuer des optimisations automatiques de déroulage de boucle ; quant aux
 autres dimension la variable est chargée du \emph{scratchpad}.
 
+\paragraph{}
 Le plus gros ralentissement dans l'exécution du programme était bien évidemment
 la compilation du programme OpenCL à chaque appel de la tâche, l'idéal est donc
 de le charger une seuls fois à l'initialisation et de garder un pointeur dessus
-pour y accéder si besoin.\\
+pour y accéder si besoin.
+
 Une passe d'initialisation existe déjà, elle se charge de créer la tâche adaptée
 au runtime, c'est-à-dire, avec la signature correspondante et de transformer les
 appels de fonctions en enregistrement et en soumission de tâches dans le main.
@@ -438,11 +452,11 @@ variable globale, référencé par l'index attribué au périphérique de calcul
 détecté sur la machine sur lequel on l'a compilé. Cela nous permet de lancer
 plus d'un worker en même temps sur des matériels différents de la machine, on
 charge ensuite le \emph{kernel}, et dans le même cas que pour un programme, j'ai
-réimplémenté la fonction de chargement du \emph{kernel}, et créé une
-nouvelle structure semblable à celle utilisée pour le stockage du programme
-compilé, dans laquelle on enregistre le \emph{kernel} en variable globale, j'ai
-par conséquent aussi mis en place une fonction permettant de récupérer cette
-donnée si besoin et une autre pour la libérer en fin d'exécution.
+réimplémenté la fonction de chargement du \emph{kernel}, et créé une nouvelle
+structure semblable à celle utilisée pour le stockage du programme compilé, dans
+laquelle on enregistre le \emph{kernel} en variable globale, j'ai par conséquent
+aussi mis en place une fonction permettant de récupérer cette donnée si besoin
+et une autre pour la libérer en fin d'exécution.
 
 Une autre modification à faire : un programme OpenCL peut contenir plusieurs
 \emph{kernels}, en quatre versions chacun, ce serait encore une fois une perte
@@ -452,6 +466,7 @@ redondances de tester si la variable globale contenant le programme compilé est
 nulle, et si elle ne l'est pas, de passer directement au chargement du
 \emph{kernel}.
 
+\paragraph{}
 Le code de la figure~\ref{calc_jacobi} représente le calcul de jacobi en LLVM
 IR. Le spécialisateur génère le code hôte et le code SPIR. La
 figure~\ref{jacobi_task_create} montre le code de création de tâche et de
@@ -502,22 +517,24 @@ de 1.053 GHz, et une bande passante théorique de 320 Go/s.
 \paragraph{}
 Je continue de tester le résultat obtenu de ma passe de spécialisation OpenCL
 sur l'exemple de jacobi ; et je peux, maintenant, que j'ai implémenté toute les
-fonctions nécessaires à la spécialisation des différents types de tâche, créer un
-binaire contenant uniquement le code spécialisé qui tournera sur une plateforme
-de calcul OpenCL. La passe crée un module pour le code hôte qui s'exécute sur le
-CPU, crée les buffers sur le périphérique de calcul choisi et copie les
-données dans ces derniers puis lance l'exécution du \emph{kernel}, et un autre
-pour le code de calcul en SPIR.
+fonctions nécessaires à la spécialisation des différents types de tâche, créer
+un binaire contenant uniquement le code spécialisé qui tournera sur une
+plateforme de calcul OpenCL. La passe crée un module pour le code hôte qui
+s'exécute sur le CPU, crée les buffers sur le périphérique de calcul choisi et
+copie les données dans ces derniers puis lance l'exécution du \emph{kernel}, et
+un autre pour le code de calcul en SPIR.
 
+\paragraph{}
 J'ai testé l'exécution du noyau de calcul sur le CPU et le KNC, mais pas les
 deux en même temps, car il y a deux versions de librairies OpenCL installées sur
 la machine, la première ne gère que les matériel de type CPU et l'autre est
-spécifique au Xoen Phi.
+spécifique au Xeon Phi.
 
-J'ai validé les résultats en les comparant à des fichiers de références des
-spécialisateurs x86 et Cuda, qui ont tout deux été validés auparavant avec des
+J'ai validé les résultats en les comparant à des fichiers de référence des
+spécialisateurs X86 et Cuda, qui ont tout deux été validés auparavant avec des
 versions du code écrits à la main.
 
+\paragraph{}
 La commande \emph{htop} permet de voir la charge de travail sur la machine. J'ai
 aussi utilisé le panneau de contrôle du Xeon Phi qui permet de voir la charge,
 la mémoire consommée et la puissance exploité sur ce dernier. Des variables
@@ -535,44 +552,44 @@ montre le résultat pour une exécution, sur des tableaux de float de tailles
    \label{micsmc_gui}
 \end{figure}
 
-Les résultats semblent prometteurs mais un peut lent, on tire bien profit de la
-puissance du matériel, mais l'exécution n'est pas assez fluide. J'utilise alors
-un autre outil : \emph{Intel VTune} qui permet d'analyser le code, de voir le
-code assembleur et vérifier que le compilateur a bien vectorisé les opérations
-vectorielles, et d'afficher les point chaud qui font ralentir l'exécution. Il
-apparaît que le problème vient du scheduler de tâches, ce dernier ne semble pas
-tirer profit au maximum du matériel, le temps passé à attendre l'exécution
-d'une tâche est trop grand par rapport au temps de calcul. J'ai tenté de changer
-le nombre de \emph{threads} par bloc, pour essayer de lancer des paquets de
-tailles multiple au nombre de c\oe{}urs ; certaines tailles montrées quelque
-amélioration mais assez minime. Une analyse plus approfondie relèverais
-peut-être de meilleure modification sans doute la modification de l'algorithme
-ou du modèle d'exécution des tâches.
+\paragraph{}
+Les performances semblent prometteuses mais un peut lentes, on tire bien profit
+de la puissance du matériel, mais l'exécution n'est pas assez fluide. J'utilise
+alors un autre outil : \emph{Intel VTune} qui permet d'analyser le code, de voir
+le code assembleur et vérifier que le compilateur a bien vectorisé les
+opérations vectorielles, et d'afficher les points chauds qui font ralentir
+l'exécution. Il apparaît que le problème vient du scheduler de tâches, ce
+dernier ne semble pas tirer profit au maximum du matériel, le temps passé à
+attendre l'exécution d'une tâche est trop grand par rapport au temps de calcul.
+J'ai tenté de changer le nombre de \emph{threads} par bloc, pour essayer de
+lancer des paquets de tailles multiple au nombre de c\oe{}urs ; certaines
+tailles montrées quelques améliorations mais assez minime. Une analyse plus
+approfondie relèverait peut-être de meilleure modification sans doute la
+modification de l'algorithme ou du modèle d'exécution des tâches.
 
 \subsubsection{Test de toute la chaîne de compilation}
 \addetoc{subsubsection}{Test entire toolchain}
 \paragraph{}
-Le projet \emph{Mach} arrive bientôt à sa finalisation, la chaîne d'outils est
-alors bien assez complète pour la tester entièrement en partant d'un code écrit
-en \emph{K} représenté dans la figure~\ref{mandel_k}. C'est un code de calcul de
-recherche des points appartenant à \emph{l'ensemble de mandelbrot}. Je le
-compile à l'aide du frontend \emph{KFE}, qui génère deux fichiers en LLVM IR
-étendue avec les notions d'ALV, ND array, etc. Le premier contient la fonction
-\emph{main}, et l'autre les tâches de calcul. Je passe ces deux derniers au
-spécialisateur OpenCL, qui génère à son tour les codes \emph{kernel} et le code
-hôte. Le tout est ensuite compilé pour créer finalement un binaire pour
-plateforme OpenCL.
+Le projet \emph{Mach} arrive bientôt à sa fin, la chaîne d'outils est alors bien
+assez complète pour la tester entièrement en partant d'un code écrit en \emph{K}
+représenté dans la figure~\ref{mandel_k}. C'est un code de calcul de recherche
+des points appartenant à \emph{l'ensemble de mandelbrot}. Je le compile à l'aide
+du frontend \emph{KFE}, qui génère deux fichiers en LLVM IR étendue avec les
+notions d'ALV, ND array, etc. Le premier contient la fonction \emph{main}, et
+l'autre les tâches de calcul. Je passe ces deux derniers au spécialisateur
+OpenCL, qui génère à son tour les codes \emph{kernel} et le code hôte. Le tout
+est ensuite compilé pour créer finalement un binaire pour plateforme OpenCL.
 
 \lstset{
    frame=L,
    language=c,
    keywordstyle=\color{blue},
-   otherkeywords={*,call},
+   otherkeywords={call},
    basicstyle=\footnotesize,
    breaklines=true,
    breakatwhitespace=false,
 }
-\begin{figure}[h!]
+\begin{figure}[hb!]
    \lstinputlisting{./code/mandel.k}
    \caption{Mandelbrot écrit en K}
    \label{mandel_k}

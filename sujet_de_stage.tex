@@ -4,7 +4,7 @@
 \addetoc{subsection}{General description of the Mach project}
 \paragraph{ITEA Mach~\cite{mach}}
 est un projet européen regroupant une vingtaine de partenaires dont AS+, le
-CEA-LIST, l'INRA, Silkan, Thales Communications and security... L'objectif de ce
+CEA-LIST, l'INRA, Silkan, Thales Communications and Security... L'objectif de ce
 projet est de faciliter la programmation sur machines hybrides combinant CPU et
 accélérateurs tels que GPU et Xeon-Phi, en partant d'une approche de type DSL
 (Domain Specific Language) embarqué si besoin dans un langage hôte (DSeL). Pour
@@ -16,7 +16,7 @@ signal, mécanique des fluides, biostatistiques, etc.
 Le rôle d'AS+ est de fournir les technologies permettant de construire des
 chaînes de compilation modulaires construites autour du compilateur LLVM et un
 modèle d’exécution de type tâche pour des architectures hétérogènes en
-s’appuyant sur les DSL mis en place pour chaque domaine. La Société travaille
+s’appuyant sur les DSL mis en place pour chaque domaine. La société travaille
 plus particulièrement avec l’INRA et le CEA-LIST en langage R dans le domaine
 des biostatistiques. L’INRA apporte les applications et le CEA-LIST apporte le
 frontend de traduction du langage R vers vers une représentation intermédiaire
@@ -32,7 +32,7 @@ figure~\ref{toolchain_fr}.
 \end{figure}
 
 \paragraph{}
-On peut décrire la chaîne de compilation développée par AS+ comme ceci : On
+On peut décrire la chaîne de compilation développée par AS+ comme ceci : on
 prend en entrée du code dans une version étendue du langage LLVM IR, annotée si
 besoin pour faciliter la compilation. Le code passe par le tâchifieur
 (Parallelizer) qui s'occupe de regrouper en tâches les instructions réalisées et
@@ -65,22 +65,24 @@ choix de gérer quand et dans quel ordre il va les exécuter, sachant qu'il
 connait les accès mémoires de chaque tâche. Il pourra, par conséquent, se
 construire un graphe de dépendance de données entre ces dernières, ainsi tout en
 respectant un tant soit peu l'ordre dans lequel les tâches lui sont données, le
-runtime pouvant les réordonner quand cela permet une exécution parallèle.\\
+runtime pouvant les réordonner quand cela permet une exécution parallèle.
+
 Le découpage en tâches de l’application permet une répartition de charge
 dynamique sur les différentes ressources de calcul indépendamment de
 l’application. Il doit donc être capable de déterminer les unités de calcul
-disponibles. On lui incombe également la gestion de la mémoire et la gestion des
+disponibles. Lui incombe également la gestion de la mémoire et la gestion des
 allocations et des copies mémoires dans le cas où des unités de calcul accèdent
 à de la mémoire différente (comme le CPU et un GPU ou Xeon-Phi).
 
+\paragraph{}
 Il existe des runtimes qui répondent à nos attentes, nous allons donc en
-utiliser un, StarPU. Mais nous allons tout de même définir une interface
+utiliser un : StarPU. Mais nous allons tout de même définir une interface
 d'abstraction pour limiter l'adhérence au runtime sous-jacent et nous permettre
 d'ajouter des fonctionnalités absentes de ce dernier sans avoir à le modifier en
 profondeur.
 
-\subsubsection{STARPU}
-\addetoc{subsubsection}{STARPU}
+\subsubsection{StarPU}
+\addetoc{subsubsection}{StarPU}
 \paragraph{}
 \sloppy
 StarPU est un runtime par tâches pour systèmes multic\oe{}urs hétérogène
@@ -89,7 +91,8 @@ développé par l'équipe runtime de l'INRIA de Bordeaux~\cite{starpu}.
 \fussy
 Il peut gérer les systèmes multi-processeurs, GPU Nvidia en utilisant Cuda et
 les différents périphériques répondant à OpenCL (GPU AMD ou Intel Xeon-Phi par
-exemple).\\
+exemple).
+
 Le runtime intègre également un gestionnaire de mémoire. Il est capable de gérer
 les dépendances entre les tâches à l’aide des intentions fournies avec ces
 tâches. Il fournit également la possibilité de découper les zones mémoires
@@ -106,31 +109,33 @@ Anciennement appelé \og{} Low Level Virtual Machine \fg{} (Machine Virtuelle de
 Bas Niveau en français), \emph{LLVM}~\cite{llvm} est un projet d'infrastructure
 de compilation qui permet l'optimisation de code indépendamment de toute
 plateforme et de tout langage à différentes étapes de la compilation ou à
-l'exécution du programme avec un compilateur à la volée.\\
+l'exécution du programme avec un compilateur à la volée.
+
 Le projet a débuté en 2000 en tant que projet de recherche sous la direction de
 Vikram Adve et Chris Lattner à l'Université de l'Illinois à Urbana–Champaign. Il
 est à présent distribué sous forme de logiciel libre avec une licence permissive
 et il est écrit sous forme de bibliothèques réutilisables.
 
 Il définit une séparation claire des phases de compilation, un langage
-intermédiaire et un ensemble de back-end pouvant générer du code pour une
-architecture spécifique.\\
-Il propose aussi depuis sa version 2.6 le compilateur Clang pour les langages C,
-C++, Objective-C et Objective-C++.\\
-Ce front-end se charge de traduire le code en langage intermédiaire de plus bas
-niveau, le c\oe{}ur de LLVM applique ensuite des passes de transformation et
-d'optimisation de code, et le back-end, le code en assembleur pour une
+intermédiaire et un ensemble de back-ends pouvant générer du code pour une
 architecture spécifique.
 
 \paragraph{}
-La modularité est un concept clés dans LLVM, grâce à cette architecture, l'ajout
-de la prise en charge d'un nouveau langage de haut niveau est réduit à écrire le
+Il propose aussi depuis sa version 2.6 le compilateur Clang pour les langages C,
+C++, Objective-C et Objective-C++. Ce front-end se charge de traduire le code en
+langage intermédiaire de plus bas niveau, le c\oe{}ur de LLVM applique ensuite
+des passes de transformation et d'optimisation de code, et le back-end, le code
+en assembleur pour une architecture spécifique.
+
+\paragraph{}
+La modularité est un concept clé dans LLVM. Grâce à cette architecture, l'ajout
+de la prise en charge d'un nouveau langage de haut niveau se réduit à écrire le
 front-end de traduction vers le LLVM IR et la prise en charge d'un nouveau
 processeur avec le back-end correspondant. Mais LLVM impose cette séparation des
 étapes de manière formelle : le seul outil de communication entre les étapes est
 le langage LLVM IR.
 
-\subsubsection{Pass}
+\subsubsection{Passes}
 \addetoc{subsubsection}{Pass}
 \paragraph{}
 La partie centrale fonctionne par l'application d’un ensemble de passes. Il y a
@@ -171,12 +176,14 @@ préciser de taille au préalable, étant donné que la majorité des architectu
 matérielles sont de type SIMD(Single Instruction Multiple Data)/SIMT(Single
 Instruction Multiple Thread), une même instruction est donc appliquée sur un
 vecteur de données en parallèle, ou à un sous-ensemble de vecteur avec
-masquage.\\
+masquage.
+
+\paragraph{}
 Les ALV sont marqués de taille 0 en IR. Ils sont utiles pour gérer les données
 spécifiques lors des instructions de chargement/stockage (load/store). Toutes
 les opérations sur les vecteurs classiques sont supportées sur les ALV.
 
-Il a fallut pour cela patcher LLVM afin de lui faire accepter les vecteurs de
+Il a fallu pour cela patcher LLVM afin de lui faire accepter les vecteurs de
 taille nulle.
 
 \subsubsection{ND array}
@@ -186,8 +193,8 @@ Ces tableaux à $n$ dimensions sont inspirés de la bibliothèque \emph{NumPy} d
 \emph{Python}. Ces conteneurs sont transparents pour chaque types de données.
 Ils offrent un concept de vue, c'est-à-dire que plusieurs ND array peuvent se
 partager les mêmes données et y travailler et accéder de manières différentes.
-Des fonctions de manipulation sont donc implémentées dans le runtime pour gérer
-la copie, l'extraction, etc.\ de données de ces conteneurs.
+Des fonctions de manipulation sont implémentées dans le runtime pour gérer la
+copie, l'extraction, etc.\ de données de ces conteneurs.
 
 \subsubsection{Marqueur d'Intents}
 \addetoc{subsubsection}{Intents marker}
@@ -210,14 +217,14 @@ mise en \oe{}uvre des tâches.
 
 \begin{itemize}
 \item \emph{ufunc} (Universal function), est une fonction opérant sur des ND
-array élément par élément.
+   array élément par élément.
 
 \item \emph{rfunc} (Reduce function), est une opération de réduction
-s'appliquant à tous les éléments d'un vecteur. Le ND array en entrée peut être
-directement le résultat d'une fonction optionnelle \emph{ufunc}.
+   s'appliquant à tous les éléments d'un vecteur. Le ND array en entrée peut
+      être directement le résultat d'une fonction optionnelle \emph{ufunc}.
 
 \item \emph{sfunc} (Scan function), est une opération de réduction cumulative
-sur un vecteur.
+   sur un vecteur.
 \end{itemize}
 
 \subsection{État d'avancement du projet Mach}
@@ -228,6 +235,7 @@ code sont déjà implémentées. La première était la passe de spécialisation
 \emph{Cuda}, où l'on retrouve les mêmes principes qu'en \emph{OpenCl}, c'est
 d'ailleurs sur cette dernière que je base mon travail, les autre passes sont
 définies ainsi :
+
 \begin{description}
 \item[PrototypeArgPacker] Créer une nouvelle fonction ayant la bonne signature.
 \item[CallSiteTransform] Transformer l'appel de l’ancienne fonction à la nouvelle.
@@ -239,13 +247,13 @@ définies ainsi :
 \item[X86Specializer] Spécialisateur de code X86.
 \end{description}
 
-\subsection{KFE}
-\addetoc{subsection}{KFE}
+\subsection{KFE (K-Frontend)}
+\addetoc{subsection}{KFE (K-Frontend)}
 \paragraph{}
 Les premiers codes permettant de tester le bon fonctionnement des passes de
 spécialisateurs était écrit en langage LLVM, en raison de non disponibilité du
 frontend R qui est encore sous développement, un autre frontend de compilation à
 donc été implémenté temporairement prenant en entrée un code écrit en \og{} K
-\fg{}, un langage inventé proche de la syntaxe \emph{C} qui nous permettrait
+\fg{}, un langage inventé inspiré de la syntaxe \emph{C} qui nous permettrait
 d'écrire un code de manière plus commode, et dont il était plus simple de lui
-intégré les différents concept attendu dans la chaîne.
+intégrer les différents concept attendu dans la chaîne.

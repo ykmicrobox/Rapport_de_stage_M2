@@ -1,25 +1,25 @@
 \renewcommand{\abstractname}{Résumé}
 \begin{abstract}
 \end{abstract}
-Dans le cadre du calcul Haute Performance (HPC), l'utilisation des accélérateurs
-(GPUs ou Xeon Phi) à tendance à augmenter. Malheureusement, très peu de codes
-de calcul sont capables d'exploiter toutes les performances de ces matériels.
-Les coûts de translation et optimisations appropriées deviennent plus gros, et
-les modèles de programmations ne sont pas unifiés, à part quelques initiatives
-comme OpenCL. Les technologies actuelles nécessitent généralement un compromis
-entre la généricité et la performance. Pourtant, il est clair que les structures
+Dans le cadre du calcul haute performance (HPC), l'utilisation des accélérateurs
+(GPUs ou Xeon Phi) a tendance à augmenter. Malheureusement, très peu de codes de
+calcul sont capables d'exploiter toutes les performances de ces matériels.  Les
+coûts de translation et optimisations appropriées deviennent plus gros, et les
+modèles de programmations ne sont pas unifiés, à part quelques initiatives comme
+OpenCL. Les technologies actuelles nécessitent généralement un compromis entre
+la généricité et la performance. Pourtant, il est clair que les structures
 algorithmiques nécessaires pour la plupart des accélérateurs sont similaires et
 que cette abstraction suffisante pourrait adresser les différentes
-architectures. AS+ en partenariat avec le CEA et l'INRA ont développé dans le
+architectures. AS+ en partenariat avec le CEA et l'INRA a développé dans le
 cadre du projet ITEA Mach une chaîne de compilation basée sur le langage R pour
-des machines hétérogènes mixant CPUs, GPUs et Xoen Phi. Le backend de cette
+des machines hétérogènes mixant CPUs, GPUs et Xeon Phi. Le backend de cette
 chaîne développé par AS+, repose sur une couche d'abstraction, et de modules de
 spécialisations pour différentes cibles. Le code optimisé exprimé avec cette
 couche d'abstraction ne nécessite pas de réécriture de code, le module de
 spécialisation génère automatiquement un code performant pour le matériel ciblé.
-Le code exécuté est vue comme un ensemble de tâches avec des dépendances de
+Le code exécuté est vu comme un ensemble de tâches avec des dépendances de
 données implicites. Le but de mon stage est de mettre en \oe{}uvre l'un des
-modules de spécialisation, qui permet de généré du code optimisé en OpenCL.
+modules de spécialisation, qui permet de générer du code optimisé en OpenCL.
 
 \renewcommand{\abstractname}{Abstract}
 \begin{abstract}
@@ -34,9 +34,9 @@ structures required for most accelerators are similar and that sufficient
 abstraction would address the different architectures. Whitin ITEA MACH project
 AS+ teams have jointly developed with CEA and INRA a toolchain for compiling R
 language to heterogeneous platforms mixing CPUs, GPUs and Xeon Phi. The backend
-of this toolchain, developpend by AS+, relies on an abstraction layer, and
+of this toolchain, developped by AS+, relies on an abstraction layer, and
 specialization modules for different targets. Optimized code expressed with this
-abstraction layer no longer require rewriting and specialization module
+abstraction layer no longer requires rewriting and a specialization module
 automatically generates an efficient code for the target architecture. The code
 to be executed can be seen as a set of smaller tasks with implicit data
 dependencies. The purpose of my internship is to implement one of the

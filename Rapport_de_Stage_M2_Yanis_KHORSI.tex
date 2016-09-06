@@ -7,7 +7,7 @@
 \usepackage{eurosym}
 \usepackage{fancyhdr}
 \usepackage[T1]{fontenc}
-\usepackage[bottom=40mm]{geometry}
+\usepackage[bottom=39mm]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
@@ -21,13 +21,13 @@
 \input{page_de_garde.tex}
 
 \newpage
-\pagestyle{empty}
+\pagestyle{fancy}
+\lhead{}
+\rhead{Yanis \bsc{KHORSI}}
+\cfoot{}
 \null
 \newpage
-
-\pagestyle{fancy}
 \lhead{\rightmark}
-\rhead{Yanis \bsc{KHORSI}}
 \cfoot{\thepage}
 
 \input{remerciements.tex}
@@ -54,7 +54,6 @@
 \input{entreprise_et_service.tex}
 \input{sujet_de_stage.tex}
 \input{travaux_realises.tex}
-\newpage
 \input{conclusion.tex}
 
 \newpage

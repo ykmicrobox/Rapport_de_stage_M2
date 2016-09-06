@@ -2,11 +2,11 @@
 \addetoc{section}{Conclusion}
 \paragraph{}
 Le but de mon stage était de mettre en \oe{}uvre un module de spécialisation
-\emph{OpenCL}, en utilisant l'infrastructure de compilation LLVM et en ce basant
-sur un modèle et une architecture logicielle définit par les précédente
-passes déjè développées, prenant en entrée un code écrit en représentation
-intermédiaire générique, et produit un code optimisé pour les périphériques de
-calcul OpenCL, tels que le Xeon Phi.
+\emph{OpenCL}, en utilisant l'infrastructure de compilation LLVM et en se basant
+sur un modèle et une architecture logicielle défini par les précédentes passes
+déjà développées, prenant en entrée un code écrit en représentation
+intermédiaire générique, et produisant un code optimisé pour les périphériques
+de calcul OpenCL, tels que le Xeon Phi.
 
 J’ai rempli cet objectif en fournissant ce module. J'ai aussi effectué les
 modifications et implémentations nécessaires dans le runtime pour lui permettre
@@ -15,18 +15,20 @@ encore si cela était possible.
 
 Ce travail bien qu'il reste à y effectuer quelques optimisations pour la
 production de code plus performant, a été jugé de qualité suffisante pour être
-intégré au reste de la chaîne de compilation et servir de cas démonstrateur au
-près des partenaire du projet.
+intégré au reste de la chaîne de compilation et servir de cas démonstrateur
+auprès des partenaires du projet.
 
+\paragraph{}
 Le projet \emph{Mach} peut maintenant cibler une machine hétérogène. Néanmoins,
 le système actuel n'est pas prévu pour fonctionner sur une machines distribuées,
-ce qui est nécessaires à l'exploitation correct des calculateurs utilisés dans
-le domaine du HPC. Le projet \emph{$M^2DC$ (H2020)} en cours de développement dans
+ce qui est nécessaire à l'exploitation correct des calculateurs utilisés dans le
+domaine du HPC. Le projet \emph{$M^2DC$ (H2020)} en cours de développement dans
 lequel intervient \emph{AS+} auprès d'autres partenaires vient conforté ce
 système en fournissant un runtime permettant de gérer dynamiquement
 l'ordonnancement des tâches sur plusieurs n\oe{}uds de calculs.
 
+\paragraph{}
 Pour finir, ce stage m'a permit d'apporter ma contribution à un projet
-professionnel européen, et mettre en profit mes connaissances en HPC acquissent
+professionnel européen, et mettre en profit mes connaissances en HPC acquises
 tout au long de mon cursus universitaire, et d'approfondir mes compétences dans
 ce domaine.
